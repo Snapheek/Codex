@@ -1,0 +1,164 @@
+# Конфигурация парсера Kwork.ru
+# =================================
+
+# Настройки парсера
+parser:
+  # Базовый URL для парсинга проектов
+  base_url: "https://kwork.ru/projects"
+  
+  # Параметры запросов
+  max_pages: 50
+  concurrent_requests: 5
+  request_delay: 2  # секунды между запросами
+  page_delay: 5     # секунды между страницами
+  
+  # Таймауты
+  request_timeout: 30
+  session_timeout: 300
+  
+  # Retry настройки  
+  max_retries: 3
+  retry_delay: 5
+  exponential_backoff: true
+  
+  # Фильтры проектов
+  filters:
+    category: 41  # ID категории (41 - Программирование)
+    min_price: 0
+    max_price: null
+    exclude_keywords: []  # исключать проекты с этими словами
+    include_keywords: []  # включать только проекты с этими словами
+
+# Настройки базы данных
+database:
+  # Тип БД: sqlite или postgresql
+  type: "sqlite"
+  
+  # SQLite настройки
+  sqlite:
+    path: "data/kwork_projects.db"
+    
+  # PostgreSQL настройки (если используется)
+  postgresql:
+    host: "localhost"
+    port: 5432
+    database: "kwork_parser"
+    username: "kwork_user"
+    password: "${DB_PASSWORD}"  # из переменной окружения
+    
+  # Общие настройки
+  echo: false  # логировать SQL запросы
+  pool_size: 5
+  max_overflow: 10
+
+# Настройки Telegram бота
+telegram:
+  # Токен бота (из переменной окружения)
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  
+  # ID чата для уведомлений
+  chat_id: "${TELEGRAM_CHAT_ID}"
+  
+  # Настройки отправки
+  send_notifications: true
+  group_notifications: true  # группировать уведомления
+  max_group_size: 5         # максимум проектов в одном сообщении
+  
+  # Формат сообщений
+  message_format: "rich"  # "simple" или "rich"
+  use_emojis: true
+  parse_mode: "Markdown"
+  
+  # Retry настройки
+  max_retries: 3
+  retry_delay: 2
+
+# Настройки мониторинга
+monitoring:
+  # Интервал проверки новых проектов (секунды)
+  check_interval: 300  # 5 минут
+  
+  # Рабочие часы (UTC)
+  working_hours:
+    enabled: false
+    start: "09:00"
+    end: "21:00"
+    timezone: "Europe/Moscow"
+    
+  # Health check
+  health_check:
+    enabled: true
+    port: 8080
+    endpoint: "/health"
+    
+  # Автоматический перезапуск
+  auto_restart:
+    enabled: true
+    max_failures: 5
+    restart_delay: 60
+
+# Настройки экспорта
+export:
+  # Директория для сохранения файлов
+  output_dir: "exports"
+  
+  # Форматы по умолчанию
+  default_format: "csv"
+  
+  # CSV настройки
+  csv:
+    delimiter: ","
+    encoding: "utf-8-sig"  # для корректного отображения русских символов в Excel
+    
+  # Excel настройки
+  excel:
+    sheet_name: "Kwork Projects"
+    include_formulas: false
+    
+  # JSON настройки
+  json:
+    indent: 2
+    ensure_ascii: false
+
+# Настройки антибот защиты
+antibot:
+  # Ротация User-Agent
+  user_agents:
+    enabled: true
+    rotate_interval: 10  # запросов
+    
+  # Использование прокси
+  proxies:
+    enabled: false
+    proxy_list: []
+    rotate_interval: 100
+    
+  # Имитация браузера
+  browser_simulation:
+    enabled: true
+    random_scroll: false
+    random_clicks: false
+    
+  # Обход защиты
+  bypass:
+    use_sessions: true
+    accept_cookies: true
+    follow_redirects: true
+
+# Настройки логирования
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  
+  # Файлы логов
+  files:
+    main: "logs/kwork_parser.log"
+    parser: "logs/parser.log"
+    telegram: "logs/telegram.log"
+    database: "logs/database.log"
+    
+  # Ротация логов
+  rotation: "1 day"
+  retention: "7 days"
+  
+  # Формат
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}" 
